@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QR Code Scanner</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://unpkg.com/html5-qrcode/dist/html5-qrcode.min.css"
+    />
+    <style>
+      #reader {
+        width: 600px;
+        margin: 0 auto;
+        margin-top: 50px;
+      }
+      .flash {
+        animation: flash 0.5s ease-in-out;
+      }
+      @keyframes flash {
+        from {
+          background-color: green;
+        }
+        to {
+          background-color: transparent;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center">QR Code Scanner</h1>
+      <div id="reader"></div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script>
+      let lastScannedCode = null;
+
+      function onScanSuccess(decodedText, decodedResult) {
+        if (decodedText !== lastScannedCode) {
+          lastScannedCode = decodedText;
+          flashScreen();
+          sendCodeToServer(decodedText);
+        }
+      }
+
+      function flashScreen() {
+        document.body.classList.add("flash");
+        setTimeout(() => {
+          document.body.classList.remove("flash");
+        }, 500);
+      }
+
+      function sendCodeToServer(code) {
+        $.ajax({
+          url: "http://localhost:9500/scanned",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({ token: code }),
+          success: function (response) {
+            console.log("Code sent successfully");
+          },
+          error: function (error) {
+            console.error("Error sending code:", error);
+          },
+        });
+      }
+
+      let html5QrCode = new Html5Qrcode("reader");
+      const config = { fps: 10, qrbox: 250 };
+
+      html5QrCode
+        .start({ facingMode: "environment" }, config, onScanSuccess)
+        .catch((err) => {
+          console.error("Error starting the scanner:", err);
+        });
+    </script>
+  </body>
+</html>
