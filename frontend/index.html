@@ -60,7 +60,7 @@
 
       function sendCodeToServer(code) {
         $.ajax({
-          url: "http://localhost:9500/scanned",
+          url: "https://madhacksapi.amoses.dev/scanned",
           type: "POST",
           contentType: "application/json",
           data: JSON.stringify({ token: code }),
